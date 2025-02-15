@@ -1,3 +1,17 @@
 APRounds:
-    Description: "{PlayerName} deals {Value1}% more attack damage to Elite and Boss enemies."
     Name: Armor-Piercing Rounds
+    Description: |-
+        {PlayerName} deals {Value}% more attack damage to Elite and Boss enemies.
+        Stacks: {Stack}
+FuelCell:
+    Name: Fuel Cell
+    Description: |-
+        |Tool| cards can be used {Value} more time{Value:plural one='' other='s'}.
+        Stack: {Stack}
+LysateCell:
+    Name: Lysate Cell
+    Description: |-
+        The first |e:{Value}| card{Value:plural one='' other='s'} |Exiled| each combat {Value:plural one='is' other='are'} returned to the discard pile.
+        This does not affect |Status| and |Misfortune| cards.
+        |p:Corrupts all Fuel Cells.|
+        Stack: {Stack}

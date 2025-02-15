@@ -22,14 +22,16 @@ using LBoL.Core.Units;
 using LBoL.Core.StatusEffects;
 using Mono.Cecil;
 using RoR2_Items.Exhibits;
+using LBoLEntitySideloader.Utils;
+using LBoL.EntityLib.Cards.Misfortune;
 
 namespace RoR2_Items.Exhibits
 {
-    public sealed class APRoundsDef : ExhibitTemplate
+    public sealed class LysateCellDef : ExhibitTemplate
     {
         public override IdContainer GetId()
         {
-            return nameof(APRounds);
+            return nameof(LysateCell);
         }
 
         public override LocalizationOption LoadLocalization()
@@ -55,7 +57,7 @@ namespace RoR2_Items.Exhibits
             var exhibitConfig = new ExhibitConfig(
                 Index: 0,
                 Id: "",
-                Order: 20,
+                Order: 10,
                 IsDebug: false,
                 IsPooled: true,
                 IsSentinel: false,
@@ -63,16 +65,16 @@ namespace RoR2_Items.Exhibits
                 Appearance: AppearanceType.Anywhere,
                 Owner: "",
                 LosableType: ExhibitLosableType.Losable,
-                Rarity: Rarity.Common,
-                Value1: 25,
+                Rarity: Rarity.Uncommon,
+                Value1: null,
                 Value2: null,
                 Value3: null,
                 Mana: null,
                 BaseManaRequirement: null,
                 BaseManaColor: null,
                 BaseManaAmount: 1,
-                HasCounter: false,
-                InitialCounter: null,
+                HasCounter: true,
+                InitialCounter: 0,
                 Keywords: Keyword.None,
                 RelativeEffects: new List<string>() { },
                 RelativeCards: new List<string>() { }
@@ -84,47 +86,35 @@ namespace RoR2_Items.Exhibits
         }
     }
 
-    [EntityLogic(typeof(APRoundsDef))]
-    public sealed class APRounds : Item
+    [EntityLogic(typeof(LysateCellDef))]
+    public sealed class LysateCell : VoidItem
     {
-        protected override Type VoidItemType()
+        protected override Type[] OriginalItemTypes()
         {
-            return null;
+            return new Type[] { typeof(FuelCell) };
         }
-        public int Value
-        {
-            get { return this.Stack * this.Value1; }
-        }
-        private float Ratio
+        public float Value
         {
             get
             {
-                return ((float)this.Value + 100f) / 100f;
+                return this.Stack;
             }
         }
         protected override void OnEnterBattle()
         {
-            foreach (EnemyUnit enemyUnit in Battle.AllAliveEnemies)
-            {
-                base.HandleBattleEvent<DamageEventArgs>(enemyUnit.DamageReceiving, new GameEventHandler<DamageEventArgs>(this.OnEnemyDamageReceiving));
-            }
-            base.HandleBattleEvent<UnitEventArgs>(base.Battle.EnemySpawned, new GameEventHandler<UnitEventArgs>(this.OnEnemySpawned));
+            base.Counter = this.Stack;
+            base.ReactBattleEvent<CardEventArgs>(base.Battle.CardExiled, new EventSequencedReactor<CardEventArgs>(this.OnCardExiled));
         }
-        private void OnEnemySpawned(UnitEventArgs args)
+        protected override void OnLeaveBattle()
         {
-            base.HandleBattleEvent<DamageEventArgs>(args.Unit.DamageReceiving, new GameEventHandler<DamageEventArgs>(this.OnEnemyDamageReceiving));
+            base.Counter = 0;
         }
-        private void OnEnemyDamageReceiving(DamageEventArgs args)
+        private IEnumerable<BattleAction> OnCardExiled(CardEventArgs args)
         {
-            if (args.DamageInfo.DamageType == DamageType.Attack && args.Target is EnemyUnit enemyUnit
-                && (enemyUnit.Config.Type == EnemyType.Elite || enemyUnit.Config.Type == EnemyType.Boss))
+            if (args.Card.CardType != CardType.Status && args.Card.CardType != CardType.Misfortune && base.Counter > 0)
             {
-                args.DamageInfo = args.DamageInfo.MultiplyBy(this.Ratio);
-                args.AddModifier(this);
-                if (args.Cause != ActionCause.OnlyCalculate)
-                {
-                    base.NotifyActivating();
-                }
+                yield return new MoveCardAction(args.Card, CardZone.Discard);
+                Counter--;
             }
         }
     }

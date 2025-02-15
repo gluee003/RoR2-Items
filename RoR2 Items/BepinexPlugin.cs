@@ -151,6 +151,9 @@ namespace RoR2_Items
 
             if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(AddWatermark.API.GUID))
                 WatermarkWrapper.ActivateWatermark();
+
+            Handlers.RegisterHandlers();
+            new GrStateContainer().RegisterSelf(PInfo.GUID);
         }
 
         private void OnDestroy()

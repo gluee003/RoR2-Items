@@ -26,20 +26,19 @@ using LBoL.Presentation;
 
 namespace RoR2_Items.Exhibits
 {
-    public abstract class RoR2Item : Exhibit
+    public abstract class Item : RoR2Item
     {
-        public int Stack = 1;
+        protected abstract Type VoidItemType();
         protected override void OnGain(PlayerUnit player)
         {
-            base.GameRun.ExhibitPool.Add(this.GetType());
+            base.OnGain(player);
             foreach (Exhibit exhibit in player.Exhibits)
             {
-                if (exhibit is RoR2Item ror2item 
-                    && ror2item.GetType() == this.GetType() 
-                    && ror2item != this)
+                if (exhibit is VoidItem voidItem
+                    && voidItem.GetType() == this.VoidItemType())
                 {
                     base.GameRun.LoseExhibit(this, true, true);
-                    ror2item.Stack++;
+                    voidItem.Stack++;
                     break;
                 }
             }

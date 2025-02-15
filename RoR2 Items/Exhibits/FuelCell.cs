@@ -25,11 +25,11 @@ using RoR2_Items.Exhibits;
 
 namespace RoR2_Items.Exhibits
 {
-    public sealed class APRoundsDef : ExhibitTemplate
+    public sealed class FuelCellDef : ExhibitTemplate
     {
         public override IdContainer GetId()
         {
-            return nameof(APRounds);
+            return nameof(FuelCell);
         }
 
         public override LocalizationOption LoadLocalization()
@@ -55,7 +55,7 @@ namespace RoR2_Items.Exhibits
             var exhibitConfig = new ExhibitConfig(
                 Index: 0,
                 Id: "",
-                Order: 20,
+                Order: 10,
                 IsDebug: false,
                 IsPooled: true,
                 IsSentinel: false,
@@ -63,8 +63,8 @@ namespace RoR2_Items.Exhibits
                 Appearance: AppearanceType.Anywhere,
                 Owner: "",
                 LosableType: ExhibitLosableType.Losable,
-                Rarity: Rarity.Common,
-                Value1: 25,
+                Rarity: Rarity.Uncommon,
+                Value1: 1,
                 Value2: null,
                 Value3: null,
                 Mana: null,
@@ -84,46 +84,58 @@ namespace RoR2_Items.Exhibits
         }
     }
 
-    [EntityLogic(typeof(APRoundsDef))]
-    public sealed class APRounds : Item
+    [EntityLogic(typeof(FuelCellDef))]
+    public sealed class FuelCell : Item
     {
         protected override Type VoidItemType()
         {
-            return null;
+            return typeof(LysateCell);
         }
         public int Value
         {
             get { return this.Stack * this.Value1; }
         }
-        private float Ratio
+        protected override void OnGain(PlayerUnit player)
         {
-            get
+            foreach (Card card in base.GameRun.BaseDeck)
             {
-                return ((float)this.Value + 100f) / 100f;
+                if (card.DeckCounter != null)
+                {
+                    card.DeckCounter += 1;
+                }
             }
+            base.OnGain(player);
+        }
+        protected override void OnAdded(PlayerUnit player)
+        {
+            base.HandleGameRunEvent<CardsEventArgs>(base.GameRun.DeckCardsAdded, new GameEventHandler<CardsEventArgs>(this.OnAddCard));
         }
         protected override void OnEnterBattle()
         {
-            foreach (EnemyUnit enemyUnit in Battle.AllAliveEnemies)
-            {
-                base.HandleBattleEvent<DamageEventArgs>(enemyUnit.DamageReceiving, new GameEventHandler<DamageEventArgs>(this.OnEnemyDamageReceiving));
-            }
-            base.HandleBattleEvent<UnitEventArgs>(base.Battle.EnemySpawned, new GameEventHandler<UnitEventArgs>(this.OnEnemySpawned));
+            base.HandleBattleEvent<CardsEventArgs>(base.Battle.CardsAddedToHand, new GameEventHandler<CardsEventArgs>(this.OnAddCard));
+            base.HandleBattleEvent<CardsEventArgs>(base.Battle.CardsAddingToDiscard, new GameEventHandler<CardsEventArgs>(this.OnAddCard));
+            base.HandleBattleEvent<CardsEventArgs>(base.Battle.CardsAddedToExile, new GameEventHandler<CardsEventArgs>(this.OnAddCard));
+            base.HandleBattleEvent<CardsAddingToDrawZoneEventArgs>(base.Battle.CardsAddedToDrawZone, new GameEventHandler<CardsAddingToDrawZoneEventArgs>(this.OnCardsAddedToDrawZone));
         }
-        private void OnEnemySpawned(UnitEventArgs args)
+        private void OnAddCard(CardsEventArgs args)
         {
-            base.HandleBattleEvent<DamageEventArgs>(args.Unit.DamageReceiving, new GameEventHandler<DamageEventArgs>(this.OnEnemyDamageReceiving));
-        }
-        private void OnEnemyDamageReceiving(DamageEventArgs args)
-        {
-            if (args.DamageInfo.DamageType == DamageType.Attack && args.Target is EnemyUnit enemyUnit
-                && (enemyUnit.Config.Type == EnemyType.Elite || enemyUnit.Config.Type == EnemyType.Boss))
+            foreach (Card card in args.Cards)
             {
-                args.DamageInfo = args.DamageInfo.MultiplyBy(this.Ratio);
-                args.AddModifier(this);
-                if (args.Cause != ActionCause.OnlyCalculate)
+                if (card.DeckCounter != null)
                 {
                     base.NotifyActivating();
+                    card.DeckCounter += Value;
+                }
+            }
+        }
+        private void OnCardsAddedToDrawZone(CardsAddingToDrawZoneEventArgs args)
+        {
+            foreach (Card card in args.Cards)
+            {
+                if (card.DeckCounter != null)
+                {
+                    base.NotifyActivating();
+                    card.DeckCounter += Value;
                 }
             }
         }
