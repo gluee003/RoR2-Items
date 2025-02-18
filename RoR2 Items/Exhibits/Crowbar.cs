@@ -22,16 +22,14 @@ using LBoL.Core.Units;
 using LBoL.Core.StatusEffects;
 using Mono.Cecil;
 using RoR2_Items.Exhibits;
-using LBoLEntitySideloader.Utils;
-using LBoL.EntityLib.Cards.Misfortune;
 
 namespace RoR2_Items.Exhibits
 {
-    public sealed class LysateCellDef : ExhibitTemplate
+    public sealed class CrowbarDef : ExhibitTemplate
     {
         public override IdContainer GetId()
         {
-            return nameof(LysateCell);
+            return nameof(Crowbar);
         }
 
         public override LocalizationOption LoadLocalization()
@@ -57,7 +55,7 @@ namespace RoR2_Items.Exhibits
             var exhibitConfig = new ExhibitConfig(
                 Index: 0,
                 Id: "",
-                Order: 10,
+                Order: 20,
                 IsDebug: false,
                 IsPooled: true,
                 IsSentinel: false,
@@ -65,17 +63,17 @@ namespace RoR2_Items.Exhibits
                 Appearance: AppearanceType.Anywhere,
                 Owner: "",
                 LosableType: ExhibitLosableType.Losable,
-                Rarity: Rarity.Uncommon,
-                Value1: null,
-                Value2: null,
+                Rarity: Rarity.Common,
+                Value1: 75,
+                Value2: 90,
                 Value3: null,
                 Mana: null,
                 BaseManaRequirement: null,
                 BaseManaColor: null,
                 BaseManaAmount: 1,
-                HasCounter: true,
-                InitialCounter: 0,
-                Keywords: Keyword.Misfortune,
+                HasCounter: false,
+                InitialCounter: null,
+                Keywords: Keyword.None,
                 RelativeEffects: new List<string>() { },
                 RelativeCards: new List<string>() { }
                 )
@@ -86,35 +84,52 @@ namespace RoR2_Items.Exhibits
         }
     }
 
-    [EntityLogic(typeof(LysateCellDef))]
-    public sealed class LysateCell : VoidItem
+    [EntityLogic(typeof(CrowbarDef))]
+    public sealed class Crowbar : Item
     {
-        protected override Type[] OriginalItemTypes()
+        protected override Type VoidItemType()
         {
-            return new Type[] { typeof(FuelCell) };
+            return null;
         }
-        public float Value
+        public int Value
+        {
+            get { return this.Stack * this.Value1; }
+        }
+        private float Ratio
         {
             get
             {
-                return this.Stack;
+                return ((float)this.Value + 100f) / 100f;
             }
+        }
+        private bool AboveHPThreshold(Unit unit)
+        {
+            float percentHealth = (float)unit.Hp / unit.MaxHp;
+            float threshold = this.Value2 / 100f;
+            return percentHealth > threshold;
         }
         protected override void OnEnterBattle()
         {
-            base.Counter = this.Stack;
-            base.ReactBattleEvent<CardEventArgs>(base.Battle.CardExiled, new EventSequencedReactor<CardEventArgs>(this.OnCardExiled));
-        }
-        protected override void OnLeaveBattle()
-        {
-            base.Counter = 0;
-        }
-        private IEnumerable<BattleAction> OnCardExiled(CardEventArgs args)
-        {
-            if (args.Card.CardType != CardType.Status && args.Card.CardType != CardType.Misfortune && base.Counter > 0)
+            foreach (EnemyUnit enemyUnit in Battle.AllAliveEnemies)
             {
-                yield return new MoveCardAction(args.Card, CardZone.Discard);
-                Counter--;
+                base.HandleBattleEvent<DamageEventArgs>(enemyUnit.DamageReceiving, new GameEventHandler<DamageEventArgs>(this.OnEnemyDamageReceiving));
+            }
+            base.HandleBattleEvent<UnitEventArgs>(base.Battle.EnemySpawned, new GameEventHandler<UnitEventArgs>(this.OnEnemySpawned));
+        }
+        private void OnEnemySpawned(UnitEventArgs args)
+        {
+            base.HandleBattleEvent<DamageEventArgs>(args.Unit.DamageReceiving, new GameEventHandler<DamageEventArgs>(this.OnEnemyDamageReceiving));
+        }
+        private void OnEnemyDamageReceiving(DamageEventArgs args)
+        {
+            if (args.DamageInfo.DamageType == DamageType.Attack && AboveHPThreshold(args.Target))
+            {
+                args.DamageInfo = args.DamageInfo.MultiplyBy(this.Ratio);
+                args.AddModifier(this);
+                if (args.Cause != ActionCause.OnlyCalculate)
+                {
+                    base.NotifyActivating();
+                }
             }
         }
     }

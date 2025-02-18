@@ -7,15 +7,20 @@ FuelCell:
     Name: Fuel Cell
     Description: |-
         |Tool| cards can be used {Value} more time{Value:plural one='' other='s'}.
-        Stack: {Stack}
+        Stacks: {Stack}
 LysateCell:
     Name: Lysate Cell
     Description: |-
         The first |e:{Value}| non-|Status| and non-|Misfortune| card{Value:plural one='' other='s'} |Exiled| each combat {Value:plural one='is' other='are'} returned to the discard pile.
         |p:Corrupts all Fuel Cells.|
-        Stack: {Stack}
+        Stacks: {Stack}
 TopazBrooch:
     Name: Topaz Brooch
     Description: |-
         Whenever an enemy is defeated, {PlayerName} gains {Value} |Block|.
-        Stack: {Stack}
+        Stacks: {Stack}
+Crowbar:
+    Name: Crowbar
+    Description: |-
+        {PlayerName} deals {Value}% more attack damage to enemies above {Value2}% life.
+        Stacks: {Stack}
