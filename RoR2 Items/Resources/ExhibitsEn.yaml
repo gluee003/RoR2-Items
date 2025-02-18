@@ -11,7 +11,11 @@ FuelCell:
 LysateCell:
     Name: Lysate Cell
     Description: |-
-        The first |e:{Value}| card{Value:plural one='' other='s'} |Exiled| each combat {Value:plural one='is' other='are'} returned to the discard pile.
-        This does not affect |Status| and |Misfortune| cards.
+        The first |e:{Value}| non-|Status| and non-|Misfortune| card{Value:plural one='' other='s'} |Exiled| each combat {Value:plural one='is' other='are'} returned to the discard pile.
         |p:Corrupts all Fuel Cells.|
+        Stack: {Stack}
+TopazBrooch:
+    Name: Topaz Brooch
+    Description: |-
+        Whenever an enemy is defeated, {PlayerName} gains {Value} |Block|.
         Stack: {Stack}

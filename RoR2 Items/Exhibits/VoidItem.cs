@@ -26,6 +26,7 @@ using LBoL.Presentation;
 
 namespace RoR2_Items.Exhibits
 {
+    [ExhibitInfo(WeighterType = typeof(VoidItem.VoidWeighter))]
     public abstract class VoidItem : RoR2Item
     {
         protected abstract Type[] OriginalItemTypes();
@@ -53,6 +54,13 @@ namespace RoR2_Items.Exhibits
                 GameMaster.DebugGainExhibit(Library.CreateExhibit(this.GetType()));
                 //base.GameRun.GainExhibitInstantly(Library.CreateExhibit(this.GetType()));   
                 //player.UnsafeAddExhibit(Library.CreateExhibit(this.GetType()));
+            }
+        }
+        private class VoidWeighter : IExhibitWeighter
+        {
+            public float WeightFor(Type type, GameRunController gameRun)
+            {
+                return 0f;
             }
         }
     }
