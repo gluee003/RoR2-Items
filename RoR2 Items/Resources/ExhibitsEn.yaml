@@ -24,3 +24,8 @@ Crowbar:
     Description: |-
         {PlayerName} deals {Value}% more attack damage to enemies above {Value2}% life.
         Stacks: {Stack}
+BustlingFungus:
+    Name: Bustling Fungus
+    Description: |-
+        At the end of {PlayerName}'s turn, if no cards were played that turn, heal {Value} life. Works once per combat.
+        Stacks: {Stack}
