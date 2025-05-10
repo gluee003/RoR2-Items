@@ -78,10 +78,8 @@ namespace RoR2_Items.Exhibits
                 Keywords: Keyword.Misfortune,
                 RelativeEffects: new List<string>() { },
                 RelativeCards: new List<string>() { }
-                )
-            {
+                );
 
-            };
             return exhibitConfig;
         }
     }

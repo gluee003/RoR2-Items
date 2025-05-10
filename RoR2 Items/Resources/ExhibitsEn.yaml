@@ -35,3 +35,8 @@ WeepingFungus:
         Whenever {PlayerName} plays an attack card, if it is at least the |e:{Value2:ordinal one='1st' two='2nd' few='3rd' other='%th'}| consecutive attack card played, gain {Value} life.
         |p:Corrupts all Bustling Fungi.|
         Stacks: {Stack}
+Medkit:
+    Name: Medkit
+    Description: |-
+        When {PlayerName} loses life for the first time each combat, gain {Value} life.
+        Stacks: {Stack}

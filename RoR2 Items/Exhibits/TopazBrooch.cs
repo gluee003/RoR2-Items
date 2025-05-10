@@ -76,10 +76,8 @@ namespace RoR2_Items.Exhibits
                 Keywords: Keyword.Block,
                 RelativeEffects: new List<string>() { },
                 RelativeCards: new List<string>() { }
-                )
-            {
+                );
 
-            };
             return exhibitConfig;
         }
     }

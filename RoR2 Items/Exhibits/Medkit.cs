@@ -25,11 +25,11 @@ using RoR2_Items.Exhibits;
 
 namespace RoR2_Items.Exhibits
 {
-    public sealed class APRoundsDef : ExhibitTemplate
+    public sealed class MedkitDef : ExhibitTemplate
     {
         public override IdContainer GetId()
         {
-            return nameof(APRounds);
+            return nameof(Medkit);
         }
 
         public override LocalizationOption LoadLocalization()
@@ -55,7 +55,7 @@ namespace RoR2_Items.Exhibits
             var exhibitConfig = new ExhibitConfig(
                 Index: 0,
                 Id: "",
-                Order: 20,
+                Order: 10,
                 IsDebug: false,
                 IsPooled: true,
                 IsSentinel: false,
@@ -64,7 +64,7 @@ namespace RoR2_Items.Exhibits
                 Owner: "",
                 LosableType: ExhibitLosableType.Losable,
                 Rarity: Rarity.Common,
-                Value1: 25,
+                Value1: 6,
                 Value2: null,
                 Value3: null,
                 Mana: null,
@@ -82,8 +82,8 @@ namespace RoR2_Items.Exhibits
         }
     }
 
-    [EntityLogic(typeof(APRoundsDef))]
-    public sealed class APRounds : Item
+    [EntityLogic(typeof(MedkitDef))]
+    public sealed class Medkit : Item
     {
         protected override Type VoidItemType()
         {
@@ -93,36 +93,25 @@ namespace RoR2_Items.Exhibits
         {
             get { return this.Stack * this.Value1; }
         }
-        private float Ratio
-        {
-            get
-            {
-                return ((float)this.Value + 100f) / 100f;
-            }
-        }
         protected override void OnEnterBattle()
         {
-            foreach (EnemyUnit enemyUnit in Battle.AllAliveEnemies)
-            {
-                base.HandleBattleEvent<DamageEventArgs>(enemyUnit.DamageReceiving, new GameEventHandler<DamageEventArgs>(this.OnEnemyDamageReceiving));
-            }
-            base.HandleBattleEvent<UnitEventArgs>(base.Battle.EnemySpawned, new GameEventHandler<UnitEventArgs>(this.OnEnemySpawned));
+            base.Active = true;
+            base.Blackout = false;
+            base.ReactBattleEvent<DamageEventArgs>(base.Battle.Player.DamageReceived, new EventSequencedReactor<DamageEventArgs>(OnPlayerDamageReceived));
         }
-        private void OnEnemySpawned(UnitEventArgs args)
+        protected override void OnLeaveBattle()
         {
-            base.HandleBattleEvent<DamageEventArgs>(args.Unit.DamageReceiving, new GameEventHandler<DamageEventArgs>(this.OnEnemyDamageReceiving));
+            base.Active = false;
+            base.Blackout = false;
         }
-        private void OnEnemyDamageReceiving(DamageEventArgs args)
+        private IEnumerable<BattleAction> OnPlayerDamageReceived(DamageEventArgs args)
         {
-            if (args.DamageInfo.DamageType == DamageType.Attack && args.Target is EnemyUnit enemyUnit
-                && (enemyUnit.Config.Type == EnemyType.Elite || enemyUnit.Config.Type == EnemyType.Boss))
+            if (base.Active && args.DamageInfo.Damage > 0f)
             {
-                args.DamageInfo = args.DamageInfo.MultiplyBy(this.Ratio);
-                args.AddModifier(this);
-                if (args.Cause != ActionCause.OnlyCalculate)
-                {
-                    base.NotifyActivating();
-                }
+                base.NotifyActivating();
+                yield return new HealAction(base.Owner, base.Owner, this.Value);
+                base.Active = false;
+                base.Blackout = true;
             }
         }
     }

@@ -76,10 +76,8 @@ namespace RoR2_Items.Exhibits
                 Keywords: Keyword.None,
                 RelativeEffects: new List<string>() { },
                 RelativeCards: new List<string>() { }
-                )
-            {
+                );
 
-            };
             return exhibitConfig;
         }
     }
@@ -89,7 +87,7 @@ namespace RoR2_Items.Exhibits
     {
         protected override Type VoidItemType()
         {
-            return null;
+            return typeof(WeepingFungus);
         }
         public int Value
         {
