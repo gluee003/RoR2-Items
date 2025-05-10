@@ -48,6 +48,7 @@ namespace RoR2_Items
     public class GrStateContainer : CustomGameRunSaveData
     {
         public Dictionary<string, int> dict = new Dictionary<string, int>();
+        public float VoidEncounterProbability = 0f;
         public override void Restore(GameRunController gameRun)
         {
             foreach ((string type, int stack) in this.dict)
@@ -61,6 +62,7 @@ namespace RoR2_Items
                     }
                 }
             }
+            Handlers.VoidEncounterProbability = this.VoidEncounterProbability;
         }
 
         public override void Save(GameRunController gameRun)
@@ -72,6 +74,7 @@ namespace RoR2_Items
                     this.dict[ror2Item.GetType().ToString()] = ror2Item.Stack;
                 }
             }
+            this.VoidEncounterProbability = Handlers.VoidEncounterProbability;
         }
     }
 }
