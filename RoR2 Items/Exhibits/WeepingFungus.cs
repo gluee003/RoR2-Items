@@ -27,11 +27,11 @@ using LBoL.EntityLib.Cards.Misfortune;
 
 namespace RoR2_Items.Exhibits
 {
-    public sealed class LysateCellDef : ExhibitTemplate
+    public sealed class WeepingFungusDef : ExhibitTemplate
     {
         public override IdContainer GetId()
         {
-            return nameof(LysateCell);
+            return nameof(WeepingFungus);
         }
 
         public override LocalizationOption LoadLocalization()
@@ -65,9 +65,9 @@ namespace RoR2_Items.Exhibits
                 Appearance: AppearanceType.Anywhere,
                 Owner: "",
                 LosableType: ExhibitLosableType.Losable,
-                Rarity: Rarity.Uncommon,
-                Value1: null,
-                Value2: null,
+                Rarity: Rarity.Common,
+                Value1: 2,
+                Value2: 3,
                 Value3: null,
                 Mana: null,
                 BaseManaRequirement: null,
@@ -75,7 +75,7 @@ namespace RoR2_Items.Exhibits
                 BaseManaAmount: 1,
                 HasCounter: true,
                 InitialCounter: 0,
-                Keywords: Keyword.Misfortune,
+                Keywords: Keyword.None,
                 RelativeEffects: new List<string>() { },
                 RelativeCards: new List<string>() { }
                 )
@@ -86,35 +86,47 @@ namespace RoR2_Items.Exhibits
         }
     }
 
-    [EntityLogic(typeof(LysateCellDef))]
-    public sealed class LysateCell : VoidItem
+    [EntityLogic(typeof(WeepingFungusDef))]
+    public sealed class WeepingFungus : VoidItem
     {
         protected override Type[] OriginalItemTypes()
         {
-            return new Type[] { typeof(FuelCell) };
+            return new Type[] { typeof(BustlingFungus) };
         }
         public int Value
         {
             get
             {
-                return this.Stack;
+                return this.Value1 * this.Stack;
             }
         }
         protected override void OnEnterBattle()
         {
-            base.Counter = this.Stack;
-            base.ReactBattleEvent<CardEventArgs>(base.Battle.CardExiled, new EventSequencedReactor<CardEventArgs>(this.OnCardExiled));
+            base.Counter = 0;
+            base.ReactBattleEvent<CardUsingEventArgs>(base.Battle.CardUsed, new EventSequencedReactor<CardUsingEventArgs>(this.OnCardUsed));
         }
         protected override void OnLeaveBattle()
         {
             base.Counter = 0;
+            base.Active = false;
         }
-        private IEnumerable<BattleAction> OnCardExiled(CardEventArgs args)
+        private IEnumerable<BattleAction> OnCardUsed(CardUsingEventArgs args)
         {
-            if (args.Card.CardType != CardType.Status && args.Card.CardType != CardType.Misfortune && base.Counter > 0)
+            if (base.Owner.IsInTurn && args.Card.CardType == CardType.Attack)
             {
-                yield return new MoveCardAction(args.Card, CardZone.Discard);
-                Counter--;
+                base.Counter = Math.Min(base.Counter + 1, this.Value2);
+                if (base.Counter == this.Value2)
+                {
+                    base.Active = true;
+                    base.NotifyActivating();
+                    yield return new HealAction(base.Owner, base.Owner, this.Value, HealType.Normal, 0.2f);
+                }
+            }
+            else
+            {
+                base.Counter = 0;
+                base.Active = false;
+                yield break;
             }
         }
     }

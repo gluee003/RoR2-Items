@@ -29,3 +29,9 @@ BustlingFungus:
     Description: |-
         At the end of {PlayerName}'s turn, if no cards were played that turn, heal {Value} life. Works once per combat.
         Stacks: {Stack}
+WeepingFungus:
+    Name: Weeping Fungus
+    Description: |-
+        Whenever {PlayerName} plays an attack card, if it is at least the |e:{Value2:ordinal one='1st' two='2nd' few='3rd' other='%th'}| consecutive attack card played, gain {Value} life.
+        |p:Corrupts all Bustling Fungi.|
+        Stacks: {Stack}

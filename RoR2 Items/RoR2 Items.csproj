@@ -320,7 +320,9 @@
 
 
     <ItemGroup>
+      <None Remove="resources\CardsEn.yaml" />
       <None Remove="resources\ExhibitsEn.yaml" />
+      <None Remove="resources\StatusEffectsEn.yaml" />
     </ItemGroup>
 
 

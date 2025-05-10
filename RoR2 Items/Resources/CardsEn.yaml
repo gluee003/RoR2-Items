@@ -1,0 +1,5 @@
+VoidInfestor:
+    Name: Void Infestor
+    Description: |-
+        |At the end of the turn|: A random enemy becomes |p:Voidtouched|, and remove {SelfName} from combat.
+        When {SelfName} is |Exiled|, it is removed from combat.

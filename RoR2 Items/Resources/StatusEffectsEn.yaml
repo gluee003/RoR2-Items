@@ -1,0 +1,12 @@
+VoidtouchedStatus:
+    Name: Voidtouched
+    Description: |-
+        {OwnerName} is |p:Voidtouched| by a |p:Void Infestor|.
+        {OwnerName} gains {FPBuff} |Firepower| and {HPBuffPercent}% more maximum life.
+        When {OwnerName} is defeated, add a |p:Void Infestor| to the hand.
+        At the end of combat, gain a |p:Void| item.
+    Brief: |-
+        {OwnerName} is |p:Voidtouched| by a |p:Void Infestor|.
+        {OwnerName} gains |Firepower| and maximum life.
+        When {OwnerName} is defeated, add a |p:Void Infestor| to the hand.
+        At the end of combat, gain a |p:Void| item.
