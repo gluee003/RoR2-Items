@@ -23,6 +23,7 @@ using LBoL.Core.StatusEffects;
 using Mono.Cecil;
 using System.Runtime.CompilerServices;
 using LBoL.Presentation;
+using System.Linq;
 
 namespace RoR2_Items.Exhibits
 {
@@ -48,13 +49,7 @@ namespace RoR2_Items.Exhibits
                     }
                 }
             }
-
-            for (int i = 0; i < stacks; i++)
-            {
-                GameMaster.DebugGainExhibit(Library.CreateExhibit(this.GetType()));
-                //base.GameRun.GainExhibitInstantly(Library.CreateExhibit(this.GetType()));   
-                //player.UnsafeAddExhibit(Library.CreateExhibit(this.GetType()));
-            }
+            Utils.GainExhibits(this.GetType(), stacks);
         }
         private class VoidWeighter : IExhibitWeighter
         {

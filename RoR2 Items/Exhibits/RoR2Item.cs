@@ -23,6 +23,7 @@ using LBoL.Core.StatusEffects;
 using Mono.Cecil;
 using System.Runtime.CompilerServices;
 using LBoL.Presentation;
+using System.Linq;
 
 namespace RoR2_Items.Exhibits
 {
@@ -32,16 +33,14 @@ namespace RoR2_Items.Exhibits
         protected override void OnGain(PlayerUnit player)
         {
             base.GameRun.ExhibitPool.Add(this.GetType());
-            foreach (Exhibit exhibit in player.Exhibits)
+            RoR2Item item = player.Exhibits
+                .Where(e => e.GetType() == this.GetType() && e != this)
+                .FirstOrDefault() as RoR2Item;
+
+            if (item != null)
             {
-                if (exhibit is RoR2Item ror2item 
-                    && ror2item.GetType() == this.GetType() 
-                    && ror2item != this)
-                {
-                    base.GameRun.LoseExhibit(this, true, true);
-                    ror2item.Stack++;
-                    break;
-                }
+                item.Stack++;
+                base.GameRun.LoseExhibit(this, true, true);
             }
         }
     }

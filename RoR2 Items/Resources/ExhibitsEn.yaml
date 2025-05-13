@@ -40,3 +40,14 @@ Medkit:
     Description: |-
         When {PlayerName} loses life for the first time each combat, gain {Value} life.
         Stacks: {Stack}
+DelicateWatch:
+    Name: Delicate Watch
+    Description: |-
+        {PlayerName} deals {Value}% more attack damage.
+        When {PlayerName} falls below {Value2}% life, lose {SelfName}.
+        Stacks: {Stack}
+DelicateWatchBroken:
+    Name: Delicate Watch (Broken)
+    Description: |-
+        ...well, it's still right twice a day.
+        Stacks: {Stack}

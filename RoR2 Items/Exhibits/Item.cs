@@ -28,7 +28,10 @@ namespace RoR2_Items.Exhibits
 {
     public abstract class Item : RoR2Item
     {
-        protected abstract Type VoidItemType();
+        protected virtual Type VoidItemType()
+        {
+            return null;
+        }
         protected override void OnGain(PlayerUnit player)
         {
             base.OnGain(player);

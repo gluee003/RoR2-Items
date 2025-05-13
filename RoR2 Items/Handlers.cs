@@ -23,19 +23,22 @@ using LBoL.ConfigData;
 using RoR2_Items.Exhibits;
 using RoR2_Items.Status;
 using LBoL.Core.Stations;
+using LBoL.Core.Randoms;
 
 namespace RoR2_Items
 {
     internal static class Handlers
     {
         public static float VoidEncounterProbability { get; set; }
+        private static float InitialProbability = 0.15f;
+        private static float IncrementAmount = 0.1f;
         private static void ResetProbability()
         {
-            VoidEncounterProbability = 0.15f;
+            VoidEncounterProbability = InitialProbability;
         }
         private static void IncreaseProbability()
         {
-            VoidEncounterProbability = Math.Min(VoidEncounterProbability + 0.15f, 1f);
+            VoidEncounterProbability = Math.Min(VoidEncounterProbability + IncrementAmount, 1f);
         }
         public static void RegisterHandlers()
         {
@@ -75,12 +78,25 @@ namespace RoR2_Items
             BattleController battle = GameMaster.Instance?.CurrentGameRun.Battle;
             battle.React(new ApplyStatusEffectAction<VoidtouchedStatus>(battle.RandomAliveEnemy), null, ActionCause.None);
 
-            Type voidType = Library.EnumerateExhibitTypes()
+            IEnumerable<Type> voidTypes = Library.EnumerateExhibitTypes()
                 .Select(tuple => tuple.exhibitType)
-                .Where(type => type.IsSubclassOf(typeof(VoidItem)))
-                .Sample(gr.StationRng);
+                .Where(type => type.IsSubclassOf(typeof(VoidItem)));
 
-            gr.CurrentStation.AddReward(StationReward.CreateExhibit(Library.CreateExhibit(voidType)));
+            RarityWeightTable rarityTable = new RarityWeightTable(0.5f, 0.33f, 0.17f, 0f);
+            RepeatableRandomPool<Type> repeatableRandomPool = new RepeatableRandomPool<Type>();
+
+            foreach (Type type in voidTypes)
+            {
+                ExhibitConfig config = ExhibitConfig.FromId(type.Name);
+                float weight = rarityTable.WeightFor(config.Rarity);
+                repeatableRandomPool.Add(type, weight);
+            }
+
+            Type voidType = repeatableRandomPool.SampleOrDefault(gr.StationRng);
+            if (voidType != null)
+            {
+                gr.CurrentStation.AddReward(StationReward.CreateExhibit(Library.CreateExhibit(voidType)));
+            }
         }
         private static void OnEnterStage(GameEventArgs args)
         {
